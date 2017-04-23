@@ -2,8 +2,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <fcntl.h>
 
-uint64_t sum = 0;
 volatile int cur;
 volatile int flag = 0;
 
@@ -17,36 +17,47 @@ void handler_main(int s) {
 
 int main(int argc, char* argv[]) {
     int fds[argc];
-    uint64_t sums[argc];
-    for (int x = 0; x != argc; ++x) {
+    int64_t sums[argc];
+
+    if (argc == 1) {
+        _exit(0);
+    }
+    for (int x = 0; x != argc - 1; ++x) {
         signal(SIGRTMIN + x, handler_main);
     }
+    signal(SIGTERM, handler_sigterm);
+
     sigset_t ss, old;
     sigemptyset(&ss);
     for (int x = 0; x != argc - 1; ++x) {
         sigaddset(&ss, SIGRTMIN + x);
     }
     sigaddset(&ss, SIGTERM);
-    for (int i = 1; i != argc; ++i) {
-        fds[i] = open(argv[i], O_RDONLY);
+
+    for (int i = 0; i != argc - 1; ++i) {
+        fds[i] = open(argv[i + 1], O_RDONLY);
         sums[i] = 0;
     }
+
     printf("%d\n", getpid()); fflush(stdout);
     while (1) {
         sigprocmask(SIG_BLOCK, &ss, &old);
-        sigsuspend(&ss);
+        sigsuspend(&old);
         if (!flag) {
-            char* buf[16];
-            uint64_t a;
-            read(fds[cur], buf, 16);
-            sscanf(buf, "%lld", &a);
-            sums[cur] += a;
+            char buf[16];
+            int64_t a;
+            if (read(fds[cur], buf, 16) == 16) {
+                sscanf(buf, "%lld", &a);
+                sums[cur] += a;
+            } else {
+                close(fds[cur]);
+            }
         } else {
-            for (int i = 0; i != argc; ++i) {
+            for (int i = 0; i != argc - 1; ++i) {
                 printf("%lld\n", sums[i]); fflush(stdout);
             }
             _exit(0);
         }
-        sisprocmask(SIG_UNBLOCK, &ss, &old);
+        sigprocmask(SIG_UNBLOCK, &ss, &old);
     }
 }

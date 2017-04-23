@@ -1,0 +1,8 @@
+#include <stdio.h>
+
+extern mystrcmp(char* a, char* b);
+int main() {
+	char a[] = "lmao";
+	char b[] = "kek";
+	printf("%d\n", mystrcmp(a, b));
+}

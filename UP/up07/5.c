@@ -13,11 +13,11 @@ char* concat(char* file1, char* cmd2, char* cmd3, char* cmd4) {
     size_t len4 = strlen(cmd4);
     const char first[] = " | (";
     const char second[] = " || ";
-    const char third[] = " ) > ";
+    const char third[] = " ) >& ";
     size_t f = strlen(first);
     size_t s = strlen(second);
     size_t t = strlen(third);
-    char* ret = malloc(len1 + len2 + 20);
+    char* ret = malloc(len1 + len2 + len3 + len4 + 20);
     if (ret) {
         memcpy(ret, cmd2, len2);
         memcpy(ret + len2, first, sizeof(first) - 1);
@@ -48,8 +48,9 @@ int mysys(const char* str) {
 }
 
 int main(int argc, char* argv[]) {
+    int fd = open(argv[1], O_CREAT | O_TRUNC | O_RDWR, 0600);
     char* lmao = concat(argv[1], argv[2], argv[3], argv[4]);
-    printf("%s\n", lmao);
-    system(lmao);
+    mysys(lmao);
     free(lmao);
+    close(fd);
 }

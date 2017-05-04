@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
             close(fds[1]);
             close(fds[0]);
             execlp(cmd1, cmd1, NULL);
+            _exit(0);
         }
         wait(NULL);
         if (!fork()) {
@@ -24,6 +25,7 @@ int main(int argc, char* argv[]) {
             close(fds[1]);
             close(fds[0]);
             execlp(cmd2, cmd2, NULL);
+            _exit(0);
         }
         close(fds[1]);
         wait(NULL);
@@ -34,6 +36,7 @@ int main(int argc, char* argv[]) {
         dup2(fd, 1);
         close(fds[1]); close(fds[0]); close(fd);
         execlp(cmd3, cmd3, NULL);
+        _exit(0);
     }
     close(fds[1]);
     close(fds[0]);

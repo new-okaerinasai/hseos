@@ -12,19 +12,18 @@ void handler(int s) {
 }
 
 int main() {
+    signal(SIGUSR2, handler);
+    signal(SIGUSR1, handler);
     long long result = 0;
     printf("%d\n", getpid());
     fflush(stdout);
-    signal(SIGUSR2, handler);
-    signal(SIGUSR1, handler);
     int a;
     while (scanf("%d", &a) != -1) {
         if (ok) {
             result = a * a;
             printf("%lld\n", result);
             fflush(stdout);
-        }
-        else {
+        } else {
             result = -a;
             printf("%lld\n", result);
             fflush(stdout);

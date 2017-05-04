@@ -13,7 +13,7 @@ void handler(int sig) {
     }
 }
 int main() {
-    printf("%d\n", getpid()); fflush(stdout);
     signal(SIGINT, handler);
+    printf("%d\n", getpid()); fflush(stdout);
     while(1) { pause(); }
 }

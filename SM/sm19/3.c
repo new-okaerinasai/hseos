@@ -10,8 +10,6 @@ void handler(int s) {
         ++s2;
     }
     if (s == SIGUSR1) {
-        printf("%d %d\n", s1, s2);
-        fflush(stdout);
         ++s1;
     }
     if (s == SIGTERM) {
@@ -30,9 +28,15 @@ int main() {
     sigaddset(&ss, SIGUSR1);
     printf("%d\n", getpid());
     fflush(stdout);
+    int s3 = s2;
     while(1) {
         sigprocmask(SIG_BLOCK, &ss, &old);
         sigsuspend(&old);
+        if (s2 - ss == 1) {
+            s3 = s2;
+            printf("%d %d\n", s1, s2);
+            fflush(stdout);
+        }
         sigprocmask(SIG_UNBLOCK, &ss, &old);
     }
 }

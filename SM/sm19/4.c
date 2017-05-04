@@ -22,11 +22,10 @@ int main(int argc, char* argv[]) {
     if (argc == 1) {
         _exit(0);
     }
+    signal(SIGTERM, handler_sigterm);
     for (int x = 0; x != argc - 1; ++x) {
         signal(SIGRTMIN + x, handler_main);
-    }
-    signal(SIGTERM, handler_sigterm);
-
+    }=
     sigset_t ss, old;
     sigemptyset(&ss);
     for (int x = 0; x != argc - 1; ++x) {

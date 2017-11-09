@@ -32,9 +32,9 @@ int main() {
     while(1) {
         sigprocmask(SIG_BLOCK, &ss, &old);
         sigsuspend(&old);
-        if (s2 - ss == 1) {
-            s3 = s2;
-            printf("%d %d\n", s1, s2);
+        if (s1 - s3 == 1) {
+            printf("%d %d\n", s3, s2);
+            s3 = s1;
             fflush(stdout);
         }
         sigprocmask(SIG_UNBLOCK, &ss, &old);

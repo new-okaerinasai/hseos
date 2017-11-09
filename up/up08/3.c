@@ -7,24 +7,20 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 
-void prepare(char* what) {
-    char incl[] = "#include <math.h> \n#include <stdio.h>\n";
-    char head[] = "double func(double x) {\n";
-    char main_p[] = "double result = (";
-    char end[] = "); return result; }";
-    int fd = open("lmao.c", O_CREAT | O_TRUNC| O_RDWR, 0777);
-    write(fd, incl, strlen(incl));
-    write(fd, head, strlen(head));
-    write(fd, main_p, strlen(main_p));
-    write(fd, what, strlen(what));
-    write(fd, end, strlen(end));
-    close(fd);
-    execlp("gcc", "gcc", "-DPIC", "-fPIC", "-shared", "lmao.c", "-o", "lmao.so", NULL);
-    _exit(0);
-}
-
 int main(int argc, char* argv[]) {
-    if (!fork()) { prepare(argv[4]); }
+    if (!fork()) {
+        int fd = open("lmao.c", O_CREAT | O_TRUNC| O_WRONLY, 0666);
+        FILE* pre = fdopen(fd, "w");
+        fprintf(pre, "#include <math.h> \n#include <stdio.h>\n");
+        fprintf(pre, "double func(double x) {\n");
+        fprintf(pre, "double result = (");
+        fprintf(pre, "%s", argv[4]);
+        fprintf(pre, "); return result; }");
+        fclose(pre);
+        close(fd);
+        execlp("gcc", "gcc", "-DPIC", "-fPIC", "-shared", "lmao.c", "-o", "lmao.so", NULL);
+        _exit(0);
+    }
     wait(NULL);
     void* handler = dlopen("./lmao.so", RTLD_LAZY);
     void* func = dlsym(handler, "func");

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,16 +10,16 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <signal.h>
-#define _GNU_SOURCE
-
-volatile int should = 0;
+#include <sys/mman.h>
 
 void handler(int s) {
-    should = 1;
+    fcloseall();
 }
 
 int main(int argc, char* argv[]) {
-    sginal(SIGINT, handler);
+    signal(SIGINT, handler);
+
+    int ppid = getpid();
 
     int fd = socket(PF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
@@ -55,27 +56,25 @@ int main(int argc, char* argv[]) {
             _exit(0);
         }
 
-        if (should) {
-            fcloseall();
-        }
-
-        if (!fork()) {
+        int pid;
+        if (!(pid = fork())) {
             FILE* in = fdopen(afd, "w+");
             int nfd = dup(afd);
             FILE* out = fdopen(nfd, "w+");
             
             err = fprintf(out, "%s\r\n", argv[2]); fflush(out);
-            if (err <= 0) {
+            if (err <= 0 || should) {
                 _exit(0);
             }
 
             err = fprintf(out, "%d\r\n", *serial); fflush(out);
-            if (err <= 0) {
+            if (err <= 0 || should) {
                 _exit(0);
             }
 
             ++(*serial);
             int max;
+
             err = fscanf(in, "%d", &max);
             if (err <= 0) {
                 _exit(0);
